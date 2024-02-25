@@ -1,0 +1,43 @@
+#Copyright Negoita Anca-Elena, 331CA, 2023-2024
+
+Tema 1 APD - Threads
+-----------------------------------------------------------------------------------------
+In order to parallize the program and make it more time efficient, threads are used to
+divide the tasks between them. A thread is the smallest unit of execution within a process
+in a multitasking operating system.
+
+The main function creates atoi(argv[3])(or numThreads) threads that call the function resolver
+and solve the same function, by dividing the tasks by the rows or columns of the image matrix
+(that is stored in a long vector). Because of that, the vector is divided into equally
+(or almost equally) sections and each thread works on the assigned one, in the end combining
+the result with the other ones.
+
+A structure is created (struct args_thread) that stores essential information each thread has
+that is passed while creating each thread, so as to have access to its contents.
+- int id - the index of the thread in the vector of threads
+- int numThreads - the total number of threads
+- int step_x - the step that divides the x
+- int step_y - the step that divides the y
+- unsigned char **grid - the common grid for all the threads so as all the threads to share the
+changes that might happen
+- ppm_image *image - the initial image that needs to be worked on, common for the threads
+- ppm_image *scaled_image - the new image after the rescale function is called, shared by the
+threads
+- ppm_image **contour_map - the shared map
+- pthread_barrier_t *b - the common barrier that stops the execution of a thread until all the
+threads have finished their execution at that point
+
+In order to divide each section in equal parts, 2 indexes are calculated:
+int start - the start of the section of the current thread, it begins right after the section of
+the previous thread with smaller id
+int end - until where the thread works (until the end, or until its section is finished). Its section
+finishes where it starts for the next thread
+The total number of elements is divided by the number of threads, and multiplied by the id.
+
+After each section is executed, the barrier will put a stop to all of them in order to have all the
+information they created pass for all of them to work forward with the modified one.
+
+Because the threads work in parallel, the program now finishes semnifically faster because the
+tasks are divided and united in the end.
+
+In the end, the threads are joined, and only one thread remains: the main one.
